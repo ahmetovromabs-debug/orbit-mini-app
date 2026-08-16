@@ -1,7 +1,8 @@
-import type { AppState, Category, Goal, Habit, EventItem, Priority } from './types';
+import type { AppState, Category, Goal, Habit, EventItem, Priority, Settings, Locale } from './types';
+import { detectLocale } from './i18n';
 
 const STORAGE_KEY = 'orbit_state';
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 function toISODate(d = new Date()) {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
@@ -56,10 +57,20 @@ const COLORS = {
   violet: '#5B21B6',
 };
 
+function defaultSettings(): Settings {
+  const locale = detectLocale();
+  return {
+    locale,
+    weekStartsOn: locale === 'ru' ? 1 : 0,
+  };
+}
+
 function defaultState(): AppState {
   const today = toISODate();
+  const settings = defaultSettings();
   return {
     version: CURRENT_VERSION,
+    settings,
     goals: [
       { id: '1', title: 'Make me', category: 'Personal', target: '1', progress: 0, deadline: '', color: COLORS.graphite, icon: 'spark' },
       { id: '2', title: '2 liters of water', category: 'Health', target: '2L', progress: 20, deadline: '', color: COLORS.violet, icon: 'water' },
@@ -89,11 +100,17 @@ function defaultState(): AppState {
     ],
     focus: 'Move closer to the life I want, one small step at a time',
     priorities: [
-      { id: '1', title: 'Define 3 priorities for today', done: true },
-      { id: '2', title: 'Spend 1 hour on the main goal', done: false },
-      { id: '3', title: 'Review the day before sleep', done: false },
+      { id: '1', title: 'Define 3 priorities for today', done: true, subTasks: [] },
+      { id: '2', title: 'Spend 1 hour on the main goal', done: false, subTasks: [] },
+      { id: '3', title: 'Review the day before sleep', done: false, subTasks: [] },
     ],
   };
+}
+
+function normalizeSettings(s: any): Settings {
+  const locale: Locale = s?.locale === 'ru' ? 'ru' : 'en';
+  const weekStartsOn: 0 | 1 = s?.weekStartsOn === 0 || s?.weekStartsOn === 1 ? s.weekStartsOn : (locale === 'ru' ? 1 : 0);
+  return { locale, weekStartsOn };
 }
 
 function normalizeGoal(g: any): Goal {
@@ -136,11 +153,20 @@ function normalizeEvent(e: any): EventItem {
   };
 }
 
+function normalizeSubTask(s: any) {
+  return {
+    id: typeof s.id === 'string' ? s.id : Math.random().toString(36).slice(2, 9),
+    title: String(s.title ?? ''),
+    done: Boolean(s.done),
+  };
+}
+
 function normalizePriority(p: any): Priority {
   return {
     id: typeof p.id === 'string' ? p.id : Math.random().toString(36).slice(2, 9),
     title: String(p.title ?? ''),
     done: Boolean(p.done),
+    subTasks: Array.isArray(p.subTasks) ? p.subTasks.map(normalizeSubTask) : [],
   };
 }
 
@@ -149,6 +175,7 @@ export function migrateState(parsed: any): AppState {
   if (!parsed || typeof parsed !== 'object') return def;
   return {
     version: CURRENT_VERSION,
+    settings: parsed.settings ? normalizeSettings(parsed.settings) : def.settings,
     goals: Array.isArray(parsed.goals) ? parsed.goals.map(normalizeGoal) : def.goals,
     habits: Array.isArray(parsed.habits) ? parsed.habits.map(normalizeHabit) : def.habits,
     events: Array.isArray(parsed.events) ? parsed.events.map(normalizeEvent) : def.events,
@@ -211,4 +238,17 @@ export function saveState(state: AppState) {
     tg.CloudStorage.setItem(STORAGE_KEY, value, () => {});
   }
   localStorage.setItem(STORAGE_KEY, value);
+}
+
+export function exportState(state: AppState): string {
+  return JSON.stringify(state, null, 2);
+}
+
+export function importState(json: string): AppState | null {
+  try {
+    const parsed = JSON.parse(json);
+    return migrateState(parsed);
+  } catch {
+    return null;
+  }
 }

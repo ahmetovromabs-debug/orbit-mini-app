@@ -1,4 +1,5 @@
-import { Check, MoreVertical, Plus } from 'lucide-react';
+import { Check, MoreVertical, Plus, CheckCircle2, Flame } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAppState } from '../AppState';
 import { renderIcon, toISODate } from '../utils';
 import { t, formatWeekdayShort } from '../i18n';
@@ -43,20 +44,18 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
       </header>
 
       {habits.length === 0 && (
-        <div className="rounded-[22px] bg-[#151515] p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-          <p className="text-[#666666] mb-3">{t('habits.empty')}</p>
-          <button
-            onClick={() => onAdd('habit')}
-            className="px-5 py-2.5 rounded-full bg-[#9B8AFB] text-[#0a0a0a] text-sm font-semibold transition-transform active:scale-95"
-          >
-            {t('common.add')}
-          </button>
-        </div>
+        <EmptyHabits onAdd={() => onAdd('habit')} />
       )}
 
       <div className="space-y-3">
-        {habits.map((habit) => (
-          <div key={habit.id} className="rounded-[22px] bg-[#151515] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+        {habits.map((habit, i) => (
+          <motion.div
+            key={habit.id}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div
@@ -67,20 +66,24 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-base font-medium truncate">{habit.title}</p>
-                  <p className="text-sm text-[#666666]">{t('habits.streak', { count: habit.streak })}</p>
+                  <p className="text-sm text-[#666666] flex items-center gap-1">
+                    {t('habits.streak', { count: habit.streak })}
+                    {habit.streak >= 3 && <Flame size={14} className="text-[#FF9F9F]" />}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
                   onClick={() => toggleHabit(habit.id)}
                   aria-label={habit.done ? t('common.markUndone') : t('common.markDone')}
-                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-90 ${
+                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
                     habit.done ? 'text-[#0a0a0a]' : 'text-[#666666]'
                   }`}
                   style={{ backgroundColor: habit.done ? habit.color : '#242424' }}
                 >
                   <Check size={20} />
-                </button>
+                </motion.button>
                 <button
                   onClick={() => onMenu('habit', habit.id)}
                   aria-label={t('common.edit')}
@@ -99,20 +102,39 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
                   return (
                     <div key={day.date} className="flex flex-1 flex-col items-center gap-1.5">
                       <span className="text-[10px] text-[#666666]">{day.label}</span>
-                      <div
+                      <motion.div
+                        initial={false}
+                        animate={{ scale: done ? 1 : 0.9 }}
                         className="w-full aspect-square max-w-[36px] rounded-[12px] flex items-center justify-center"
                         style={{ backgroundColor: done ? habit.color : '#242424', color: done ? '#0a0a0a' : '#666666' }}
                       >
                         {done && <Check size={14} />}
-                      </div>
+                      </motion.div>
                     </div>
                   );
                 });
               })()}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function EmptyHabits({ onAdd }: { onAdd: () => void }) {
+  return (
+    <div className="rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+      <div className="w-16 h-16 rounded-full bg-[#242424] flex items-center justify-center mx-auto mb-4 text-[#86D99C]">
+        <CheckCircle2 size={28} />
+      </div>
+      <p className="text-[#666666] mb-3">{t('habits.empty')}</p>
+      <button
+        onClick={onAdd}
+        className="px-5 py-2.5 rounded-full bg-[#9B8AFB] text-[#0a0a0a] text-sm font-semibold transition-transform active:scale-95"
+      >
+        {t('common.add')}
+      </button>
     </div>
   );
 }

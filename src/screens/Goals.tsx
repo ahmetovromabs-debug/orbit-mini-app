@@ -1,4 +1,5 @@
-import { MoreVertical, Plus } from 'lucide-react';
+import { MoreVertical, Plus, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAppState } from '../AppState';
 import { renderIcon } from '../utils';
 import { t } from '../i18n';
@@ -29,20 +30,18 @@ export default function Goals({ onAdd, onMenu }: GoalsProps) {
       </header>
 
       {goals.length === 0 && (
-        <div className="rounded-[22px] bg-[#151515] p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-          <p className="text-[#666666] mb-3">{t('goals.empty')}</p>
-          <button
-            onClick={() => onAdd('goal')}
-            className="px-5 py-2.5 rounded-full bg-[#9B8AFB] text-[#0a0a0a] text-sm font-semibold transition-transform active:scale-95"
-          >
-            {t('common.add')}
-          </button>
-        </div>
+        <EmptyGoals onAdd={() => onAdd('goal')} />
       )}
 
       <div className="space-y-2.5">
-        {goals.map((goal) => (
-          <div key={goal.id} className="rounded-[22px] bg-[#151515] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+        {goals.map((goal, i) => (
+          <motion.div
+            key={goal.id}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div
@@ -65,14 +64,34 @@ export default function Goals({ onAdd, onMenu }: GoalsProps) {
               </button>
             </div>
             <div className="mt-3 h-2 rounded-full bg-[#242424] overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{ width: `${goal.progress}%`, backgroundColor: goal.color }}
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${goal.progress}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+                className="h-full rounded-full"
+                style={{ backgroundColor: goal.color }}
               />
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function EmptyGoals({ onAdd }: { onAdd: () => void }) {
+  return (
+    <div className="rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+      <div className="w-16 h-16 rounded-full bg-[#242424] flex items-center justify-center mx-auto mb-4 text-[#9B8AFB]">
+        <Target size={28} />
+      </div>
+      <p className="text-[#666666] mb-3">{t('goals.empty')}</p>
+      <button
+        onClick={onAdd}
+        className="px-5 py-2.5 rounded-full bg-[#9B8AFB] text-[#0a0a0a] text-sm font-semibold transition-transform active:scale-95"
+      >
+        {t('common.add')}
+      </button>
     </div>
   );
 }

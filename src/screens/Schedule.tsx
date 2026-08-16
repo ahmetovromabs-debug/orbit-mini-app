@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useAppState } from '../AppState';
 import { toISODate, daysInMonth, getContrastText } from '../utils';
@@ -8,7 +8,6 @@ import {
   formatDayMonth,
   formatWeekdayShort,
   getWeekdayLabels,
-  weekStartsOn,
 } from '../i18n';
 import type { EventItem, ModalType } from '../types';
 
@@ -83,8 +82,8 @@ function layoutTimedEvents(events: EventItem[]) {
 }
 
 export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
-  const { events } = useAppState();
-  const startOn = weekStartsOn();
+  const { events, settings } = useAppState();
+  const startOn = settings.weekStartsOn;
   const weekdayLabels = getWeekdayLabels(startOn);
 
   const [view, setView] = useState<CalendarView>('month');
@@ -156,7 +155,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
     return (
-      <div className="rounded-[28px] bg-[#151515] p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+      <div className="rounded-[28px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         <div className="grid grid-cols-7 gap-y-2 text-center">
           {weekdayLabels.map((label, i) => (
             <div key={i} className="text-xs text-[#666666] font-medium uppercase">
@@ -215,7 +214,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
             <button
               key={dateStr}
               onClick={() => openDay(d)}
-              className="w-full text-left rounded-[22px] bg-[#151515] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+              className="w-full text-left rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)] active:scale-[0.99] transition-transform"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-base font-semibold ${isToday ? 'text-[#9B8AFB]' : 'text-white'}`}>
@@ -247,14 +246,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     const timed = list.filter((e) => !e.allDay);
     const layout = useMemo(() => layoutTimedEvents(timed), [timed]);
     const isToday = date === today;
-
-    const [now, setNow] = useState(new Date());
-    useEffect(() => {
-      if (!isToday) return;
-      const timer = setInterval(() => setNow(new Date()), 60_000);
-      return () => clearInterval(timer);
-    }, [isToday]);
-    const nowMin = isToday ? now.getHours() * 60 + now.getMinutes() : -1;
+    const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1;
 
     const addAtHour = (hour: number) => {
       const start = `${String(hour).padStart(2, '0')}:00`;
@@ -265,14 +257,14 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     return (
       <div className="space-y-3">
         {allDay.length > 0 && (
-          <div className="rounded-[22px] bg-[#151515] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+          <div className="rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
             <p className="text-xs text-[#a6a6a6] uppercase tracking-wide mb-2">{t('schedule.allDay')}</p>
             <div className="flex flex-wrap gap-2">
               {allDay.map((event) => (
                 <button
                   key={event.id}
                   onClick={() => onMenu('event', event.id)}
-                  className="rounded-full px-3.5 py-2 text-sm font-medium"
+                  className="rounded-full px-3.5 py-2 text-sm font-medium active:scale-95 transition-transform"
                   style={{ backgroundColor: event.color, color: getContrastText(event.color) }}
                 >
                   {event.title}
@@ -282,7 +274,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
           </div>
         )}
 
-        <div className="rounded-[28px] bg-[#151515] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+        <div className="rounded-[28px] bg-[#151515]/80 backdrop-blur border border-white/5 p-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
           {list.length === 0 && allDay.length === 0 && (
             <p className="text-sm text-[#666666] text-center py-4">{t('schedule.dayHint')}</p>
           )}
@@ -319,7 +311,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
                     e.stopPropagation();
                     onMenu('event', event.id);
                   }}
-                  className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-semibold shadow-sm overflow-hidden pointer-events-auto"
+                  className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-semibold shadow-sm overflow-hidden pointer-events-auto active:scale-[0.98] transition-transform"
                   style={{
                     top,
                     height,
@@ -363,10 +355,10 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <button onClick={goPrev} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white">
+          <button onClick={goPrev} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white active:scale-90 transition-transform">
             <ChevronLeft size={20} />
           </button>
-          <button onClick={goNext} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white">
+          <button onClick={goNext} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white active:scale-90 transition-transform">
             <ChevronRight size={20} />
           </button>
         </div>
@@ -391,3 +383,4 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     </div>
   );
 }
+

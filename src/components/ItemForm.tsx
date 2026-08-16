@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, X } from 'lucide-react';
 import { useAppState } from '../AppState';
 import { PALETTE, ICONS, toISODate } from '../utils';
 import { t } from '../i18n';
-import type { Category, EventType, Goal, Habit, EventItem, Priority, ModalState } from '../types';
+import type { Category, EventType, Goal, Habit, EventItem, Priority, ModalState, SubTask } from '../types';
 
 interface ItemFormProps {
   type: 'goal' | 'habit' | 'event' | 'priority';
@@ -31,17 +33,16 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
   const defaultGoal = { title: '', category: 'Personal' as Category, target: '', progress: 0, deadline: '', color: PALETTE[0], icon: 'target' };
   const defaultHabit = { title: '', icon: 'zap', color: PALETTE[0] };
   const defaultEvent = { title: '', date: toISODate(), start: '09:00', end: '10:00', allDay: false, type: 'focus' as EventItem['type'], color: PALETTE[0] };
-  const defaultPriority = { title: '', done: false };
+  const defaultPriority = { title: '', done: false, subTasks: [] as SubTask[] };
 
   const [goal, setGoal] = useState<Partial<Goal>>(defaultGoal);
   const [habit, setHabit] = useState<Partial<Habit>>(defaultHabit);
   const [event, setEvent] = useState<Partial<EventItem>>(defaultEvent);
   const [priority, setPriority] = useState<Partial<Priority>>(defaultPriority);
+  const [subTaskInput, setSubTaskInput] = useState('');
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -60,6 +61,18 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
     if (type === 'event') setEvent({ ...defaultEvent, ...d });
     if (type === 'priority') setPriority({ ...defaultPriority, ...d });
   }, [existing, type, defaults]);
+
+  const addSubTask = () => {
+    const text = subTaskInput.trim();
+    if (!text) return;
+    const newTask: SubTask = { id: Math.random().toString(36).slice(2, 9), title: text, done: false };
+    setPriority((p) => ({ ...p, subTasks: [...(p.subTasks || []), newTask] }));
+    setSubTaskInput('');
+  };
+
+  const removeSubTask = (subId: string) => {
+    setPriority((p) => ({ ...p, subTasks: (p.subTasks || []).filter((s) => s.id !== subId) }));
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,8 +106,10 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
     if (type === 'priority') {
       const payload = priority as Priority;
       if (!payload.title?.trim()) return;
-      if (isEdit && id) updatePriority(id, payload);
-      else addPriority(payload.title!);
+      const done = (payload.subTasks || []).length > 0 ? payload.subTasks.every((s) => s.done) : payload.done;
+      const final = { ...payload, done };
+      if (isEdit && id) updatePriority(id, final);
+      else addPriority(final);
     }
     onClose();
   };
@@ -107,9 +122,19 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col justify-end" onClick={onClose} role="dialog" aria-modal="true" aria-label={formTitle()}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[70] flex flex-col justify-end"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <form
+      <motion.form
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
         className="relative z-10 flex max-h-[85vh] flex-col rounded-t-[32px] bg-[#0f0f0f] p-4 pb-[max(1rem,var(--tg-safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.5)]"
@@ -130,6 +155,54 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
                   className="w-full rounded-[20px] bg-[#151515] px-4 py-3 text-white placeholder-[#666] outline-none focus:ring-2 focus:ring-[#9B8AFB]"
                 />
               </label>
+
+              <div className="space-y-2">
+                <span className="text-sm text-[#a6a6a6]">{t('subtask.add')}</span>
+                <div className="flex gap-2">
+                  <input
+                    value={subTaskInput}
+                    onChange={(e) => setSubTaskInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSubTask(); } }}
+                    placeholder={t('subtask.placeholder')}
+                    className="flex-1 rounded-[20px] bg-[#151515] px-4 py-3 text-white placeholder-[#666] outline-none focus:ring-2 focus:ring-[#9B8AFB]"
+                  />
+                  <button
+                    type="button"
+                    onClick={addSubTask}
+                    className="w-12 h-12 rounded-[20px] bg-[#9B8AFB] text-[#0a0a0a] flex items-center justify-center active:scale-90 transition-transform"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
+                <AnimatePresence>
+                  {(priority.subTasks || []).map((sub, idx) => (
+                    <motion.div
+                      key={sub.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex items-center gap-2"
+                    >
+                      <input
+                        value={sub.title}
+                        onChange={(e) => {
+                          const next = [...(priority.subTasks || [])];
+                          next[idx] = { ...sub, title: e.target.value };
+                          setPriority((p) => ({ ...p, subTasks: next }));
+                        }}
+                        className="flex-1 rounded-[16px] bg-[#151515] px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-[#9B8AFB]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSubTask(sub.id)}
+                        className="w-9 h-9 rounded-[14px] bg-[#2a1a1a] text-[#FF9F9F] flex items-center justify-center active:scale-90 transition-transform"
+                      >
+                        <X size={16} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
             </div>
           )}
 
@@ -343,7 +416,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
             {isEdit ? t('common.save') : t('common.create')}
           </button>
         </div>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 }

@@ -10,6 +10,7 @@ const translations = {
     'tab.goals': 'Goals',
     'tab.habits': 'Habits',
     'tab.schedule': 'Schedule',
+    'tab.profile': 'Profile',
 
     'today.title': 'Today',
     'today.focus': 'Focus',
@@ -22,6 +23,7 @@ const translations = {
     'today.noPriorities': 'No priorities yet',
     'today.noHabits': 'No habits yet',
     'today.emptyFocus': 'Set your focus in Goals',
+    'today.startFocus': 'Start focus',
 
     'goals.title': 'Goals',
     'goals.subtitle': 'Big moves, small steps.',
@@ -42,6 +44,42 @@ const translations = {
     'schedule.dayHint': 'Tap a time slot to add an event',
     'schedule.allDay': 'All day',
 
+    'profile.title': 'Profile',
+    'profile.stats': 'Stats',
+    'profile.settings': 'Settings',
+
+    'stats.title': 'Stats',
+    'stats.weekly': 'Weekly completion',
+    'stats.totalCompletions': 'Total completions',
+    'stats.bestStreak': 'Best streak',
+    'stats.averageStreak': 'Average streak',
+    'stats.goalProgress': 'Goal progress',
+    'stats.eventsToday': 'Events today',
+    'stats.noData': 'No data yet',
+
+    'settings.title': 'Settings',
+    'settings.language': 'Language',
+    'settings.weekStartsOn': 'Week starts on',
+    'settings.monday': 'Monday',
+    'settings.sunday': 'Sunday',
+    'settings.clearData': 'Clear all data',
+    'settings.clearConfirm': 'Are you sure? This cannot be undone.',
+    'settings.export': 'Export data',
+    'settings.import': 'Import data',
+    'settings.importSuccess': 'Data imported successfully',
+    'settings.importError': 'Invalid data format',
+
+    'focus.title': 'Focus',
+    'focus.start': 'Start focus',
+    'focus.minutes': '{{count}} min',
+    'focus.pause': 'Pause',
+    'focus.resume': 'Resume',
+    'focus.stop': 'Stop',
+    'focus.complete': 'Focus complete!',
+
+    'subtask.add': 'Add subtask',
+    'subtask.placeholder': 'Subtask',
+
     'common.add': 'Add',
     'common.edit': 'Edit',
     'common.delete': 'Delete',
@@ -52,6 +90,8 @@ const translations = {
     'common.empty': 'Nothing here yet',
     'common.markDone': 'Mark done',
     'common.markUndone': 'Mark not done',
+    'common.done': 'Done',
+    'common.open': 'Open',
 
     'actionSheet.title': 'Actions',
 
@@ -105,6 +145,7 @@ const translations = {
     'tab.goals': 'Цели',
     'tab.habits': 'Привычки',
     'tab.schedule': 'Календарь',
+    'tab.profile': 'Профиль',
 
     'today.title': 'Сегодня',
     'today.focus': 'Фокус',
@@ -117,6 +158,7 @@ const translations = {
     'today.noPriorities': 'Пока нет приоритетов',
     'today.noHabits': 'Пока нет привычек',
     'today.emptyFocus': 'Выберите фокус в Целях',
+    'today.startFocus': 'Начать фокус',
 
     'goals.title': 'Цели',
     'goals.subtitle': 'Большие цели, маленькие шаги.',
@@ -137,6 +179,42 @@ const translations = {
     'schedule.dayHint': 'Нажмите на слот, чтобы добавить событие',
     'schedule.allDay': 'Весь день',
 
+    'profile.title': 'Профиль',
+    'profile.stats': 'Статистика',
+    'profile.settings': 'Настройки',
+
+    'stats.title': 'Статистика',
+    'stats.weekly': 'Выполнение за неделю',
+    'stats.totalCompletions': 'Всего выполнено',
+    'stats.bestStreak': 'Лучшая серия',
+    'stats.averageStreak': 'Средняя серия',
+    'stats.goalProgress': 'Прогресс целей',
+    'stats.eventsToday': 'Событий сегодня',
+    'stats.noData': 'Пока нет данных',
+
+    'settings.title': 'Настройки',
+    'settings.language': 'Язык',
+    'settings.weekStartsOn': 'Начало недели',
+    'settings.monday': 'Понедельник',
+    'settings.sunday': 'Воскресенье',
+    'settings.clearData': 'Очистить все данные',
+    'settings.clearConfirm': 'Вы уверены? Действие нельзя отменить.',
+    'settings.export': 'Экспорт данных',
+    'settings.import': 'Импорт данных',
+    'settings.importSuccess': 'Данные успешно импортированы',
+    'settings.importError': 'Некорректный формат данных',
+
+    'focus.title': 'Фокус',
+    'focus.start': 'Начать фокус',
+    'focus.minutes': '{{count}} мин',
+    'focus.pause': 'Пауза',
+    'focus.resume': 'Продолжить',
+    'focus.stop': 'Стоп',
+    'focus.complete': 'Фокус завершён!',
+
+    'subtask.add': 'Добавить подзадачу',
+    'subtask.placeholder': 'Подзадача',
+
     'common.add': 'Добавить',
     'common.edit': 'Изменить',
     'common.delete': 'Удалить',
@@ -147,6 +225,8 @@ const translations = {
     'common.empty': 'Пока пусто',
     'common.markDone': 'Отметить выполненным',
     'common.markUndone': 'Отметить невыполненным',
+    'common.done': 'Готово',
+    'common.open': 'Открыть',
 
     'actionSheet.title': 'Действия',
 
@@ -197,7 +277,7 @@ const translations = {
 
 type TransKey = keyof (typeof translations)['en'];
 
-function detectLocale(): Locale {
+export function detectLocale(): Locale {
   if (typeof window === 'undefined') return 'en';
   const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
   if (saved && (saved === 'en' || saved === 'ru')) return saved;
