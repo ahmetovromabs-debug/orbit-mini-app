@@ -21,6 +21,7 @@ function initTelegram() {
     tg.setHeaderColor('#0a0a0a');
     tg.setBackgroundColor('#0a0a0a');
     tg.BottomBar?.setParams?.({ color: '#0a0a0a' });
+    tg.disableVerticalSwipes?.();
   } catch {
     // ignore
   }
@@ -58,13 +59,17 @@ export default function App() {
         console.warn('requestFullscreen failed', e);
       }
     };
-    goFullscreen();
+    const timer = setTimeout(goFullscreen, 0);
 
+    const onFsChanged = (e: any) => console.log('fullscreen changed', e);
     const onFsFailed = (e: any) => console.warn('fullscreen failed', e);
+    tg.onEvent?.('fullscreenChanged', onFsChanged);
     tg.onEvent?.('fullscreenFailed', onFsFailed);
 
     return () => {
+      clearTimeout(timer);
       tg.offEvent?.('safeAreaChanged', applyInsets);
+      tg.offEvent?.('fullscreenChanged', onFsChanged);
       tg.offEvent?.('fullscreenFailed', onFsFailed);
     };
   }, []);
