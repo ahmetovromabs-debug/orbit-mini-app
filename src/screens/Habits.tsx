@@ -35,11 +35,24 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
         </div>
         <button
           onClick={() => onAdd('habit')}
-          className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white"
+          aria-label={t('common.add')}
+          className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white transition-transform active:scale-90"
         >
           <Plus size={20} />
         </button>
       </header>
+
+      {habits.length === 0 && (
+        <div className="rounded-[22px] bg-[#151515] p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+          <p className="text-[#666666] mb-3">{t('habits.empty')}</p>
+          <button
+            onClick={() => onAdd('habit')}
+            className="px-5 py-2.5 rounded-full bg-[#9B8AFB] text-[#0a0a0a] text-sm font-semibold transition-transform active:scale-95"
+          >
+            {t('common.add')}
+          </button>
+        </div>
+      )}
 
       <div className="space-y-3">
         {habits.map((habit) => (
@@ -57,17 +70,22 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
                   <p className="text-sm text-[#666666]">{t('habits.streak', { count: habit.streak })}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => toggleHabit(habit.id)}
-                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
+                  aria-label={habit.done ? t('common.markUndone') : t('common.markDone')}
+                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-90 ${
                     habit.done ? 'text-[#0a0a0a]' : 'text-[#666666]'
                   }`}
                   style={{ backgroundColor: habit.done ? habit.color : '#242424' }}
                 >
                   <Check size={20} />
                 </button>
-                <button onClick={() => onMenu('habit', habit.id)} className="p-2 text-[#666666]">
+                <button
+                  onClick={() => onMenu('habit', habit.id)}
+                  aria-label={t('common.edit')}
+                  className="p-2 text-[#666666] rounded-full transition-colors active:bg-white/5"
+                >
                   <MoreVertical size={18} />
                 </button>
               </div>
@@ -79,18 +97,18 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
                 return week.map((day) => {
                   const done = day.date === today ? habit.done : habit.history.includes(day.date);
                   return (
-                  <div key={day.date} className="flex flex-1 flex-col items-center gap-1.5">
-                    <span className="text-[10px] text-[#666666]">{day.label}</span>
-                    <div
-                      className="w-full aspect-square max-w-[36px] rounded-[12px] flex items-center justify-center"
-                      style={{ backgroundColor: done ? habit.color : '#242424', color: done ? '#0a0a0a' : '#666666' }}
-                    >
-                      {done && <Check size={14} />}
+                    <div key={day.date} className="flex flex-1 flex-col items-center gap-1.5">
+                      <span className="text-[10px] text-[#666666]">{day.label}</span>
+                      <div
+                        className="w-full aspect-square max-w-[36px] rounded-[12px] flex items-center justify-center"
+                        style={{ backgroundColor: done ? habit.color : '#242424', color: done ? '#0a0a0a' : '#666666' }}
+                      >
+                        {done && <Check size={14} />}
+                      </div>
                     </div>
-                  </div>
-                );
-              });
-            })()}
+                  );
+                });
+              })()}
             </div>
           </div>
         ))}

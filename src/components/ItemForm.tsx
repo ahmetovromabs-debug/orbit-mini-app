@@ -39,6 +39,14 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
   const [priority, setPriority] = useState<Partial<Priority>>(defaultPriority);
 
   useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  useEffect(() => {
     if (existing) {
       if (type === 'goal') setGoal(existing as Goal);
       if (type === 'habit') setHabit(existing as Habit);
@@ -104,7 +112,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 flex max-h-[85vh] flex-col rounded-t-[32px] bg-[#0f0f0f] p-4 shadow-[0_-12px_40px_rgba(0,0,0,0.5)]"
+        className="relative z-10 flex max-h-[85vh] flex-col rounded-t-[32px] bg-[#0f0f0f] p-4 pb-[max(1rem,var(--tg-safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.5)]"
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#333]" />
         <h2 className="mb-4 text-2xl font-semibold">{formTitle()}</h2>
@@ -115,6 +123,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
               <label className="block space-y-1.5">
                 <span className="text-sm text-[#a6a6a6]">{t('form.title')}</span>
                 <input
+                  autoFocus
                   value={priority.title}
                   onChange={(e) => setPriority((p) => ({ ...p, title: e.target.value }))}
                   placeholder={t('form.titlePlaceholder')}
@@ -129,6 +138,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
               <label className="block space-y-1.5">
                 <span className="text-sm text-[#a6a6a6]">{t('goal.title')}</span>
                 <input
+                  autoFocus
                   value={goal.title}
                   onChange={(e) => setGoal((g) => ({ ...g, title: e.target.value }))}
                   placeholder={t('form.titlePlaceholder')}
@@ -184,6 +194,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
               <label className="block space-y-1.5">
                 <span className="text-sm text-[#a6a6a6]">{t('habit.title')}</span>
                 <input
+                  autoFocus
                   value={habit.title}
                   onChange={(e) => setHabit((h) => ({ ...h, title: e.target.value }))}
                   placeholder={t('form.titlePlaceholder')}
@@ -198,6 +209,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
               <label className="block space-y-1.5">
                 <span className="text-sm text-[#a6a6a6]">{t('event.title')}</span>
                 <input
+                  autoFocus
                   value={event.title}
                   onChange={(e) => setEvent((ev) => ({ ...ev, title: e.target.value }))}
                   placeholder={t('form.titlePlaceholder')}
@@ -320,13 +332,13 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
           <button
             type="button"
             onClick={onClose}
-            className="h-14 flex-1 rounded-[24px] bg-[#151515] text-white font-medium"
+            className="h-14 flex-1 rounded-[24px] bg-[#151515] text-white font-medium transition-transform active:scale-95"
           >
             {t('common.cancel')}
           </button>
           <button
             type="submit"
-            className="h-14 flex-1 rounded-[24px] bg-[#9B8AFB] text-[#0a0a0a] font-semibold"
+            className="h-14 flex-1 rounded-[24px] bg-[#9B8AFB] text-[#0a0a0a] font-semibold transition-transform active:scale-95"
           >
             {isEdit ? t('common.save') : t('common.create')}
           </button>

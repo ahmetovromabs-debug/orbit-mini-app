@@ -283,6 +283,9 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
         )}
 
         <div className="rounded-[28px] bg-[#151515] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+          {list.length === 0 && allDay.length === 0 && (
+            <p className="text-sm text-[#666666] text-center py-4">{t('schedule.dayHint')}</p>
+          )}
           <div className="relative" style={{ height: 24 * HOUR_HEIGHT }}>
             {Array.from({ length: 24 }, (_, h) => (
               <button
@@ -298,7 +301,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
               </button>
             ))}
 
-            <div className="absolute inset-y-0 left-10 right-0">
+            <div className="absolute inset-y-0 left-10 right-0 pointer-events-none">
               {nowMin >= 0 && (
                 <div
                   className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
@@ -316,7 +319,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
                     e.stopPropagation();
                     onMenu('event', event.id);
                   }}
-                  className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-semibold shadow-sm overflow-hidden"
+                  className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-semibold shadow-sm overflow-hidden pointer-events-auto"
                   style={{
                     top,
                     height,
@@ -348,7 +351,11 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
           <button onClick={goToday} className="text-xs text-[#9B8AFB] font-medium px-2 py-1 rounded-full bg-[#151515]">
             {t('schedule.today')}
           </button>
-          <button onClick={() => addEvent(isoCursor)} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white">
+          <button
+            onClick={() => addEvent(isoCursor)}
+            aria-label={t('common.add')}
+            className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white transition-transform active:scale-90"
+          >
             <Plus size={20} />
           </button>
         </div>

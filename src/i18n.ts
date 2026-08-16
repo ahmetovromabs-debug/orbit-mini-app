@@ -19,13 +19,17 @@ const translations = {
     'today.progress': 'progress',
     'today.done': '{{done}}/{{total}} done',
     'today.noEvents': 'No events scheduled',
+    'today.noPriorities': 'No priorities yet',
+    'today.noHabits': 'No habits yet',
     'today.emptyFocus': 'Set your focus in Goals',
 
     'goals.title': 'Goals',
     'goals.subtitle': 'Big moves, small steps.',
+    'goals.empty': 'No goals yet',
 
     'habits.title': 'Habits',
     'habits.subtitle': 'Daily small steps.',
+    'habits.empty': 'No habits yet',
     'habits.streak': '{{count}} day streak|{{count}} day streak|{{count}} day streak',
 
     'schedule.title': 'Schedule',
@@ -35,6 +39,7 @@ const translations = {
     'schedule.today': 'Today',
     'schedule.noEvents': 'No events',
     'schedule.noEventsHint': 'Tap + or a time slot to add one',
+    'schedule.dayHint': 'Tap a time slot to add an event',
     'schedule.allDay': 'All day',
 
     'common.add': 'Add',
@@ -45,6 +50,8 @@ const translations = {
     'common.create': 'Create',
     'common.close': 'Close',
     'common.empty': 'Nothing here yet',
+    'common.markDone': 'Mark done',
+    'common.markUndone': 'Mark not done',
 
     'actionSheet.title': 'Actions',
 
@@ -107,13 +114,17 @@ const translations = {
     'today.progress': 'прогресс',
     'today.done': '{{done}}/{{total}} выполнено',
     'today.noEvents': 'Нет событий',
+    'today.noPriorities': 'Пока нет приоритетов',
+    'today.noHabits': 'Пока нет привычек',
     'today.emptyFocus': 'Выберите фокус в Целях',
 
     'goals.title': 'Цели',
     'goals.subtitle': 'Большие цели, маленькие шаги.',
+    'goals.empty': 'Пока нет целей',
 
     'habits.title': 'Привычки',
     'habits.subtitle': 'Ежедневные маленькие шаги.',
+    'habits.empty': 'Пока нет привычек',
     'habits.streak': '{{count}} день подряд|{{count}} дня подряд|{{count}} дней подряд',
 
     'schedule.title': 'Календарь',
@@ -123,6 +134,7 @@ const translations = {
     'schedule.today': 'Сегодня',
     'schedule.noEvents': 'Нет событий',
     'schedule.noEventsHint': 'Нажмите + или слот, чтобы добавить',
+    'schedule.dayHint': 'Нажмите на слот, чтобы добавить событие',
     'schedule.allDay': 'Весь день',
 
     'common.add': 'Добавить',
@@ -133,6 +145,8 @@ const translations = {
     'common.create': 'Создать',
     'common.close': 'Закрыть',
     'common.empty': 'Пока пусто',
+    'common.markDone': 'Отметить выполненным',
+    'common.markUndone': 'Отметить невыполненным',
 
     'actionSheet.title': 'Действия',
 

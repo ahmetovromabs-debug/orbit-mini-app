@@ -21,11 +21,24 @@ export default function Goals({ onAdd, onMenu }: GoalsProps) {
         </div>
         <button
           onClick={() => onAdd('goal')}
-          className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white"
+          aria-label={t('common.add')}
+          className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white transition-transform active:scale-90"
         >
           <Plus size={20} />
         </button>
       </header>
+
+      {goals.length === 0 && (
+        <div className="rounded-[22px] bg-[#151515] p-8 text-center shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+          <p className="text-[#666666] mb-3">{t('goals.empty')}</p>
+          <button
+            onClick={() => onAdd('goal')}
+            className="px-5 py-2.5 rounded-full bg-[#9B8AFB] text-[#0a0a0a] text-sm font-semibold transition-transform active:scale-95"
+          >
+            {t('common.add')}
+          </button>
+        </div>
+      )}
 
       <div className="space-y-2.5">
         {goals.map((goal) => (
@@ -43,7 +56,11 @@ export default function Goals({ onAdd, onMenu }: GoalsProps) {
                   <p className="text-sm text-[#666666]">{t(`category.${goal.category}`)} · {goal.progress}%</p>
                 </div>
               </div>
-              <button onClick={() => onMenu('goal', goal.id)} className="p-2 text-[#666666]">
+              <button
+                onClick={() => onMenu('goal', goal.id)}
+                aria-label={t('common.edit')}
+                className="p-2 text-[#666666] rounded-full transition-colors active:bg-white/5 shrink-0"
+              >
                 <MoreVertical size={18} />
               </button>
             </div>
