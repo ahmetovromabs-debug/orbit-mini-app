@@ -1,4 +1,4 @@
-import type { AppState, Goal, Habit, EventItem, Priority } from './types';
+import type { AppState, Category, Goal, Habit, EventItem, Priority } from './types';
 
 const STORAGE_KEY = 'orbit_state';
 const CURRENT_VERSION = 2;
@@ -19,6 +19,32 @@ function lastDays(n: number) {
   return arr;
 }
 
+function recentHistory(streak: number, done: boolean): string[] {
+  return done ? lastDays(streak) : lastDays(streak + 1).slice(0, -1);
+}
+
+export function computeStreak(history: string[], done: boolean): number {
+  const today = toISODate();
+  const set = new Set(history);
+  if (done) set.add(today);
+  else set.delete(today);
+
+  const day = new Date();
+  if (!done) day.setDate(day.getDate() - 1);
+
+  let streak = 0;
+  while (true) {
+    const key = toISODate(day);
+    if (set.has(key)) {
+      streak++;
+      day.setDate(day.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
 const COLORS = {
   lavender: '#9B8AFB',
   mint: '#86D99C',
@@ -35,14 +61,26 @@ function defaultState(): AppState {
   return {
     version: CURRENT_VERSION,
     goals: [
-      { id: '1', title: 'Make me', category: 'Personal', target: '1', progress: 0, deadline: '', color: COLORS.graphite, icon: 'spark', count: 0 },
-      { id: '2', title: '2 liters of water', category: 'Health', target: '2L', progress: 20, deadline: '', color: COLORS.violet, icon: 'water', count: 1 },
-      { id: '3', title: 'Future me. Be him, not now', category: 'Personal', target: '1', progress: 0, deadline: '', color: COLORS.graphite, icon: 'spark', count: 0 },
+      { id: '1', title: 'Make me', category: 'Personal', target: '1', progress: 0, deadline: '', color: COLORS.graphite, icon: 'spark' },
+      { id: '2', title: '2 liters of water', category: 'Health', target: '2L', progress: 20, deadline: '', color: COLORS.violet, icon: 'water' },
+      { id: '3', title: 'Future me. Be him, not now', category: 'Personal', target: '1', progress: 0, deadline: '', color: COLORS.graphite, icon: 'spark' },
     ],
     habits: [
-      { id: '1', title: 'Read 10 pages', icon: 'book', color: COLORS.lavender, streak: 12, done: false, history: lastDays(12) },
-      { id: '2', title: 'Meditate 10 min', icon: 'brain', color: COLORS.mint, streak: 5, done: true, history: [...lastDays(5)] },
-      { id: '3', title: 'No sugar', icon: 'zap', color: COLORS.yellow, streak: 3, done: false, history: lastDays(3) },
+      (() => {
+        const done = false;
+        const history = recentHistory(12, done);
+        return { id: '1', title: 'Read 10 pages', icon: 'book', color: COLORS.lavender, streak: computeStreak(history, done), done, history };
+      })(),
+      (() => {
+        const done = true;
+        const history = recentHistory(5, done);
+        return { id: '2', title: 'Meditate 10 min', icon: 'brain', color: COLORS.mint, streak: computeStreak(history, done), done, history };
+      })(),
+      (() => {
+        const done = false;
+        const history = recentHistory(3, done);
+        return { id: '3', title: 'No sugar', icon: 'zap', color: COLORS.yellow, streak: computeStreak(history, done), done, history };
+      })(),
     ],
     events: [
       { id: '1', title: 'Morning focus', date: today, start: '09:00', end: '10:30', allDay: false, type: 'focus', color: COLORS.lavender },
@@ -62,25 +100,25 @@ function normalizeGoal(g: any): Goal {
   return {
     id: typeof g.id === 'string' ? g.id : Math.random().toString(36).slice(2, 9),
     title: String(g.title ?? ''),
-    category: String(g.category ?? 'Personal'),
+    category: (String(g.category ?? 'Personal') as Category),
     target: String(g.target ?? ''),
     progress: Number(g.progress ?? 0),
     deadline: String(g.deadline ?? ''),
     color: String(g.color ?? COLORS.graphite),
     icon: String(g.icon ?? 'spark'),
-    count: Number(g.count ?? 0),
   };
 }
 
 function normalizeHabit(h: any): Habit {
   const history = Array.isArray(h.history) ? h.history.filter((d: any) => typeof d === 'string') : [];
+  const done = Boolean(h.done);
   return {
     id: typeof h.id === 'string' ? h.id : Math.random().toString(36).slice(2, 9),
     title: String(h.title ?? ''),
     icon: String(h.icon ?? 'zap'),
     color: String(h.color ?? COLORS.lavender),
-    streak: Number(h.streak ?? 0),
-    done: Boolean(h.done),
+    streak: computeStreak(history, done),
+    done,
     history,
   };
 }
@@ -125,7 +163,7 @@ function getTelegram() {
 }
 
 function isInsideTelegram(tg: any) {
-  return Boolean(tg?.initData);
+  return Boolean(tg?.initData || tg?.initDataUnsafe?.user?.id);
 }
 
 function loadLocal(): AppState | null {

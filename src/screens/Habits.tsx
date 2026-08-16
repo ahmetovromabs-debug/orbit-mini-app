@@ -74,9 +74,11 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
             </div>
 
             <div className="mt-3 flex items-center justify-between gap-1.5">
-              {week.map((day) => {
-                const done = habit.history.includes(day.date) || (habit.done && day.date === toISODate());
-                return (
+              {(() => {
+                const today = toISODate();
+                return week.map((day) => {
+                  const done = day.date === today ? habit.done : habit.history.includes(day.date);
+                  return (
                   <div key={day.date} className="flex flex-1 flex-col items-center gap-1.5">
                     <span className="text-[10px] text-[#666666]">{day.label}</span>
                     <div
@@ -87,7 +89,8 @@ export default function Habits({ onAdd, onMenu }: HabitsProps) {
                     </div>
                   </div>
                 );
-              })}
+              });
+            })()}
             </div>
           </div>
         ))}

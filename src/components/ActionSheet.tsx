@@ -14,7 +14,7 @@ interface ActionSheetProps {
 
 export default function ActionSheet({ title, options, onClose }: ActionSheetProps) {
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex flex-col justify-end" onClick={onClose} role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-black/60" />
       <div
         className="relative z-10 mx-3 mb-6 rounded-[28px] bg-[#151515] p-4 shadow-[0_12px_40px_rgba(0,0,0,0.5)]"

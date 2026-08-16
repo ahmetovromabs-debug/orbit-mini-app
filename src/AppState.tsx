@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { loadState, saveState } from './storage';
+import { loadState, saveState, computeStreak } from './storage';
+import { toISODate } from './utils';
 import type { AppState, Goal, Habit, EventItem, Priority } from './types';
 
 interface ContextType extends AppState {
@@ -25,30 +26,6 @@ const AppStateContext = createContext<ContextType | null>(null);
 
 function createId() {
   return Math.random().toString(36).slice(2, 9);
-}
-
-function toISODate(d = new Date()) {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
-}
-
-function computeStreak(history: string[], doneToday: boolean) {
-  const today = toISODate();
-  const set = new Set(history);
-  if (doneToday && !set.has(today)) set.add(today);
-  if (!doneToday && set.has(today)) set.delete(today);
-
-  let streak = 0;
-  let day = new Date();
-  while (true) {
-    const key = toISODate(day);
-    if (set.has(key)) {
-      streak++;
-      day.setDate(day.getDate() - 1);
-    } else {
-      break;
-    }
-  }
-  return streak;
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {

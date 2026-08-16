@@ -40,7 +40,7 @@ export default function Goals({ onAdd, onMenu }: GoalsProps) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-base font-medium truncate">{goal.title}</p>
-                  <p className="text-sm text-[#666666]">{t(`category.${goal.category}` as any)} · {goal.progress}%</p>
+                  <p className="text-sm text-[#666666]">{t(`category.${goal.category}`)} · {goal.progress}%</p>
                 </div>
               </div>
               <button onClick={() => onMenu('goal', goal.id)} className="p-2 text-[#666666]">

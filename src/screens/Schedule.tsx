@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useAppState } from '../AppState';
-import { toISODate, daysInMonth } from '../utils';
+import { toISODate, daysInMonth, getContrastText } from '../utils';
 import {
   t,
   formatMonthYear,
@@ -247,7 +247,13 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     const timed = list.filter((e) => !e.allDay);
     const layout = useMemo(() => layoutTimedEvents(timed), [timed]);
     const isToday = date === today;
-    const now = new Date();
+
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+      if (!isToday) return;
+      const timer = setInterval(() => setNow(new Date()), 60_000);
+      return () => clearInterval(timer);
+    }, [isToday]);
     const nowMin = isToday ? now.getHours() * 60 + now.getMinutes() : -1;
 
     const addAtHour = (hour: number) => {
@@ -266,8 +272,8 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
                 <button
                   key={event.id}
                   onClick={() => onMenu('event', event.id)}
-                  className="rounded-full px-3.5 py-2 text-sm font-medium text-[#0a0a0a]"
-                  style={{ backgroundColor: event.color }}
+                  className="rounded-full px-3.5 py-2 text-sm font-medium"
+                  style={{ backgroundColor: event.color, color: getContrastText(event.color) }}
                 >
                   {event.title}
                 </button>
@@ -292,36 +298,39 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
               </button>
             ))}
 
-            {nowMin >= 0 && (
-              <div
-                className="absolute left-10 right-0 z-20 flex items-center pointer-events-none"
-                style={{ top: (nowMin / 60) * HOUR_HEIGHT }}
-              >
-                <div className="w-2 h-2 rounded-full bg-[#FF9F9F] -ml-1" />
-                <div className="flex-1 h-px bg-[#FF9F9F]" />
-              </div>
-            )}
+            <div className="absolute inset-y-0 left-10 right-0">
+              {nowMin >= 0 && (
+                <div
+                  className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
+                  style={{ top: (nowMin / 60) * HOUR_HEIGHT }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#FF9F9F] -ml-1" />
+                  <div className="flex-1 h-px bg-[#FF9F9F]" />
+                </div>
+              )}
 
-            {layout.map(({ event, top, height, left, width }) => (
-              <button
-                key={event.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMenu('event', event.id);
-                }}
-                className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-medium text-[#0a0a0a] shadow-sm overflow-hidden"
-                style={{
-                  top,
-                  height,
-                  left: `calc(2.5rem + ${left}%)`,
-                  width: `calc(${width}% - 2.5rem - 8px)`,
-                  backgroundColor: event.color,
-                }}
-              >
-                <span className="block truncate">{event.title}</span>
-                <span className="block opacity-80 text-[10px]">{formatTime(event.start)} – {formatTime(event.end)}</span>
-              </button>
-            ))}
+              {layout.map(({ event, top, height, left, width }) => (
+                <button
+                  key={event.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMenu('event', event.id);
+                  }}
+                  className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-semibold shadow-sm overflow-hidden"
+                  style={{
+                    top,
+                    height,
+                    left: `${left}%`,
+                    width: `calc(${width}% - 8px)`,
+                    backgroundColor: event.color,
+                    color: getContrastText(event.color),
+                  }}
+                >
+                  <span className="block truncate">{event.title}</span>
+                  <span className="block opacity-80 text-[10px]">{formatTime(event.start)} – {formatTime(event.end)}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -9,14 +9,16 @@ export interface Priority {
 export interface Goal {
   id: string;
   title: string;
-  category: string;
+  category: Category;
   target: string;
   progress: number;
   deadline: string;
   color: string;
   icon: string;
-  count: number;
 }
+
+export type Category = 'Personal' | 'Health' | 'Career' | 'Finance' | 'Learning' | 'Relationships' | 'Creative';
+export type EventType = 'focus' | 'meeting' | 'routine' | 'rest';
 
 export interface Habit {
   id: string;

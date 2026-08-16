@@ -1,6 +1,6 @@
 import { Check, MoreVertical, Plus, Target } from 'lucide-react';
 import { useAppState } from '../AppState';
-import { toISODate } from '../utils';
+import { getContrastText, toISODate } from '../utils';
 import { t, formatDateLong } from '../i18n';
 
 interface TodayProps {
@@ -11,10 +11,11 @@ interface TodayProps {
 export default function Today({ onAdd, onMenu }: TodayProps) {
   const { priorities, habits, focus, events, togglePriority, toggleHabit } = useAppState();
 
-  const doneCount = priorities.filter((p) => p.done).length;
-  const totalCount = priorities.length + habits.length;
+  const donePriorities = priorities.filter((p) => p.done).length;
   const doneHabits = habits.filter((h) => h.done).length;
-  const progress = totalCount ? Math.round(((doneCount + doneHabits) / totalCount) * 100) : 0;
+  const doneCount = donePriorities + doneHabits;
+  const totalCount = priorities.length + habits.length;
+  const progress = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
   const today = toISODate();
   const todayEvents = events.filter((e) => e.date === today).sort((a, b) => a.start.localeCompare(b.start));
 
@@ -78,7 +79,7 @@ export default function Today({ onAdd, onMenu }: TodayProps) {
             </div>
           </div>
         ))}
-        <p className="text-xs text-[#666666]">{t('today.done', { done: doneCount, total: priorities.length })}</p>
+        <p className="text-xs text-[#666666]">{t('today.done', { done: doneCount, total: totalCount })}</p>
       </div>
 
       <div className="space-y-2.5">
@@ -115,7 +116,7 @@ export default function Today({ onAdd, onMenu }: TodayProps) {
           {todayEvents.map((event) => (
             <div key={event.id} className="flex items-center gap-3 rounded-[22px] bg-[#151515] p-3 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
               <span className="text-sm text-[#a6a6a6] w-12 shrink-0">{event.allDay ? t('schedule.allDay') : event.start}</span>
-              <div className="flex-1 rounded-[16px] px-3.5 py-2.5 text-[#0a0a0a] font-medium text-sm" style={{ backgroundColor: event.color }}>
+              <div className="flex-1 rounded-[16px] px-3.5 py-2.5 font-medium text-sm" style={{ backgroundColor: event.color, color: getContrastText(event.color) }}>
                 {event.title}
               </div>
             </div>

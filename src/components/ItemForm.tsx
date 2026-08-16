@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppState } from '../AppState';
 import { PALETTE, ICONS, toISODate } from '../utils';
 import { t } from '../i18n';
-import type { Goal, Habit, EventItem, Priority, ModalState } from '../types';
+import type { Category, EventType, Goal, Habit, EventItem, Priority, ModalState } from '../types';
 
 interface ItemFormProps {
   type: 'goal' | 'habit' | 'event' | 'priority';
@@ -11,8 +11,8 @@ interface ItemFormProps {
   onClose: () => void;
 }
 
-const EVENT_TYPES = ['focus', 'meeting', 'routine', 'rest'] as const;
-const CATEGORIES = ['Personal', 'Health', 'Career', 'Finance', 'Learning', 'Relationships', 'Creative'] as const;
+const EVENT_TYPES: EventType[] = ['focus', 'meeting', 'routine', 'rest'];
+const CATEGORIES: Category[] = ['Personal', 'Health', 'Career', 'Finance', 'Learning', 'Relationships', 'Creative'];
 
 export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps) {
   const { goals, habits, events, priorities, addGoal, updateGoal, addHabit, updateHabit, addEvent, updateEvent, addPriority, updatePriority } = useAppState();
@@ -28,7 +28,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
 
   const isEdit = Boolean(existing);
 
-  const defaultGoal = { title: '', category: 'Personal', target: '', progress: 0, deadline: '', color: PALETTE[0], icon: 'target', count: 0 };
+  const defaultGoal = { title: '', category: 'Personal' as Category, target: '', progress: 0, deadline: '', color: PALETTE[0], icon: 'target' };
   const defaultHabit = { title: '', icon: 'zap', color: PALETTE[0] };
   const defaultEvent = { title: '', date: toISODate(), start: '09:00', end: '10:00', allDay: false, type: 'focus' as EventItem['type'], color: PALETTE[0] };
   const defaultPriority = { title: '', done: false };
@@ -69,7 +69,15 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
     }
     if (type === 'event') {
       let payload = event as EventItem;
-      if (payload.allDay) payload = { ...payload, start: '00:00', end: '23:59' };
+      if (payload.allDay) {
+        payload = { ...payload, start: '00:00', end: '23:59' };
+      } else if (payload.start && payload.end && payload.start >= payload.end) {
+        const [h, m] = payload.start.split(':').map(Number);
+        const endMin = h * 60 + m + 30;
+        const endH = String(Math.floor(endMin / 60)).padStart(2, '0');
+        const endM = String(endMin % 60).padStart(2, '0');
+        payload = { ...payload, end: `${endH}:${endM}` };
+      }
       if (!payload.title?.trim()) return;
       if (isEdit && id) updateEvent(id, payload);
       else addEvent(payload);
@@ -91,7 +99,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[70] flex flex-col justify-end" onClick={onClose} role="dialog" aria-modal="true" aria-label={formTitle()}>
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <form
         onSubmit={submit}
@@ -131,7 +139,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
                 <span className="text-sm text-[#a6a6a6]">{t('goal.category')}</span>
                 <select
                   value={goal.category}
-                  onChange={(e) => setGoal((g) => ({ ...g, category: e.target.value }))}
+                  onChange={(e) => setGoal((g) => ({ ...g, category: e.target.value as Category }))}
                   className="w-full rounded-[20px] bg-[#151515] px-4 py-3 text-white outline-none focus:ring-2 focus:ring-[#9B8AFB]"
                 >
                   {CATEGORIES.map((c) => (<option key={c} value={c}>{t(`category.${c}`)}</option>))}

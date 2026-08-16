@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './App.css';
 import type { Tab, ModalType, ModalState } from './types';
 import { useAppState } from './AppState';
 import { t } from './i18n';
@@ -101,7 +100,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative flex flex-col min-h-screen overflow-hidden bg-[#0a0a0a]">
+    <div className="relative flex flex-col h-full overflow-hidden bg-[#0a0a0a]">
       <main
         className="flex-1 overflow-y-auto px-3 pt-[max(1.25rem,var(--tg-safe-area-inset-top))] pb-28"
         style={{ paddingBottom: 'calc(7rem + var(--tg-safe-area-inset-bottom, 0px))' }}

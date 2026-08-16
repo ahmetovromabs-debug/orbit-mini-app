@@ -16,8 +16,10 @@ const tabs: { id: Tab; icon: React.ElementType; labelKey: 'tab.today' | 'tab.goa
 
 export default function BottomNav({ active, onChange }: BottomNavProps) {
   return (
-    <div
+    <nav
       className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center px-4 pb-[max(1.5rem,var(--tg-safe-area-inset-bottom))] pt-3 bg-transparent pointer-events-none"
+      role="tablist"
+      aria-label={t('app.title')}
     >
       <div className="pointer-events-auto flex items-center gap-2.5">
         {tabs.map((tab) => {
@@ -26,6 +28,8 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
           return (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={isActive}
               aria-label={t(tab.labelKey)}
               onClick={() => onChange(tab.id)}
               className={`w-[52px] h-[52px] rounded-full flex items-center justify-center shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-transform active:scale-95 ${
@@ -37,6 +41,6 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
