@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useAppState } from '../AppState';
-import { toISODate, daysInMonth } from '../utils';
+import { toISODate, daysInMonth, getContrastText } from '../utils';
 import {
   t,
   formatMonthYear,
   formatDayMonth,
   formatWeekdayShort,
   getWeekdayLabels,
-  weekStartsOn,
 } from '../i18n';
 import type { EventItem, ModalType } from '../types';
 
@@ -83,8 +82,8 @@ function layoutTimedEvents(events: EventItem[]) {
 }
 
 export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
-  const { events } = useAppState();
-  const startOn = weekStartsOn();
+  const { events, settings } = useAppState();
+  const startOn = settings.weekStartsOn;
   const weekdayLabels = getWeekdayLabels(startOn);
 
   const [view, setView] = useState<CalendarView>('month');
@@ -156,7 +155,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
     return (
-      <div className="rounded-[28px] bg-[#151515] p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+      <div className="rounded-[28px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
         <div className="grid grid-cols-7 gap-y-2 text-center">
           {weekdayLabels.map((label, i) => (
             <div key={i} className="text-xs text-[#666666] font-medium uppercase">
@@ -215,7 +214,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
             <button
               key={dateStr}
               onClick={() => openDay(d)}
-              className="w-full text-left rounded-[22px] bg-[#151515] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+              className="w-full text-left rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)] active:scale-[0.99] transition-transform"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className={`text-base font-semibold ${isToday ? 'text-[#9B8AFB]' : 'text-white'}`}>
@@ -247,8 +246,7 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     const timed = list.filter((e) => !e.allDay);
     const layout = useMemo(() => layoutTimedEvents(timed), [timed]);
     const isToday = date === today;
-    const now = new Date();
-    const nowMin = isToday ? now.getHours() * 60 + now.getMinutes() : -1;
+    const nowMin = isToday ? new Date().getHours() * 60 + new Date().getMinutes() : -1;
 
     const addAtHour = (hour: number) => {
       const start = `${String(hour).padStart(2, '0')}:00`;
@@ -259,15 +257,15 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     return (
       <div className="space-y-3">
         {allDay.length > 0 && (
-          <div className="rounded-[22px] bg-[#151515] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+          <div className="rounded-[22px] bg-[#151515]/80 backdrop-blur border border-white/5 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
             <p className="text-xs text-[#a6a6a6] uppercase tracking-wide mb-2">{t('schedule.allDay')}</p>
             <div className="flex flex-wrap gap-2">
               {allDay.map((event) => (
                 <button
                   key={event.id}
                   onClick={() => onMenu('event', event.id)}
-                  className="rounded-full px-3.5 py-2 text-sm font-medium text-[#0a0a0a]"
-                  style={{ backgroundColor: event.color }}
+                  className="rounded-full px-3.5 py-2 text-sm font-medium active:scale-95 transition-transform"
+                  style={{ backgroundColor: event.color, color: getContrastText(event.color) }}
                 >
                   {event.title}
                 </button>
@@ -276,7 +274,10 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
           </div>
         )}
 
-        <div className="rounded-[28px] bg-[#151515] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+        <div className="rounded-[28px] bg-[#151515]/80 backdrop-blur border border-white/5 p-3 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+          {list.length === 0 && allDay.length === 0 && (
+            <p className="text-sm text-[#666666] text-center py-4">{t('schedule.dayHint')}</p>
+          )}
           <div className="relative" style={{ height: 24 * HOUR_HEIGHT }}>
             {Array.from({ length: 24 }, (_, h) => (
               <button
@@ -292,36 +293,39 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
               </button>
             ))}
 
-            {nowMin >= 0 && (
-              <div
-                className="absolute left-10 right-0 z-20 flex items-center pointer-events-none"
-                style={{ top: (nowMin / 60) * HOUR_HEIGHT }}
-              >
-                <div className="w-2 h-2 rounded-full bg-[#FF9F9F] -ml-1" />
-                <div className="flex-1 h-px bg-[#FF9F9F]" />
-              </div>
-            )}
+            <div className="absolute inset-y-0 left-10 right-0 pointer-events-none">
+              {nowMin >= 0 && (
+                <div
+                  className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
+                  style={{ top: (nowMin / 60) * HOUR_HEIGHT }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#FF9F9F] -ml-1" />
+                  <div className="flex-1 h-px bg-[#FF9F9F]" />
+                </div>
+              )}
 
-            {layout.map(({ event, top, height, left, width }) => (
-              <button
-                key={event.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMenu('event', event.id);
-                }}
-                className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-medium text-[#0a0a0a] shadow-sm overflow-hidden"
-                style={{
-                  top,
-                  height,
-                  left: `calc(2.5rem + ${left}%)`,
-                  width: `calc(${width}% - 2.5rem - 8px)`,
-                  backgroundColor: event.color,
-                }}
-              >
-                <span className="block truncate">{event.title}</span>
-                <span className="block opacity-80 text-[10px]">{formatTime(event.start)} – {formatTime(event.end)}</span>
-              </button>
-            ))}
+              {layout.map(({ event, top, height, left, width }) => (
+                <button
+                  key={event.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMenu('event', event.id);
+                  }}
+                  className="absolute z-10 rounded-[14px] px-2.5 py-1.5 text-left text-xs font-semibold shadow-sm overflow-hidden pointer-events-auto active:scale-[0.98] transition-transform"
+                  style={{
+                    top,
+                    height,
+                    left: `${left}%`,
+                    width: `calc(${width}% - 8px)`,
+                    backgroundColor: event.color,
+                    color: getContrastText(event.color),
+                  }}
+                >
+                  <span className="block truncate">{event.title}</span>
+                  <span className="block opacity-80 text-[10px]">{formatTime(event.start)} – {formatTime(event.end)}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -339,7 +343,11 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
           <button onClick={goToday} className="text-xs text-[#9B8AFB] font-medium px-2 py-1 rounded-full bg-[#151515]">
             {t('schedule.today')}
           </button>
-          <button onClick={() => addEvent(isoCursor)} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white">
+          <button
+            onClick={() => addEvent(isoCursor)}
+            aria-label={t('common.add')}
+            className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white transition-transform active:scale-90"
+          >
             <Plus size={20} />
           </button>
         </div>
@@ -347,10 +355,10 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <button onClick={goPrev} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white">
+          <button onClick={goPrev} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white active:scale-90 transition-transform">
             <ChevronLeft size={20} />
           </button>
-          <button onClick={goNext} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white">
+          <button onClick={goNext} className="w-10 h-10 rounded-full bg-[#151515] flex items-center justify-center text-white active:scale-90 transition-transform">
             <ChevronRight size={20} />
           </button>
         </div>
@@ -375,3 +383,4 @@ export default function Schedule({ onAdd, onMenu }: ScheduleProps) {
     </div>
   );
 }
+

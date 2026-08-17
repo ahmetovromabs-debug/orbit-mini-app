@@ -1,22 +1,33 @@
-export type Tab = 'today' | 'goals' | 'habits' | 'schedule';
+export type Locale = 'ru' | 'en';
 
-export interface Priority {
+export type Tab = 'today' | 'goals' | 'habits' | 'schedule' | 'profile';
+
+export interface SubTask {
   id: string;
   title: string;
   done: boolean;
 }
 
+export interface Priority {
+  id: string;
+  title: string;
+  done: boolean;
+  subTasks: SubTask[];
+}
+
 export interface Goal {
   id: string;
   title: string;
-  category: string;
+  category: Category;
   target: string;
   progress: number;
   deadline: string;
   color: string;
   icon: string;
-  count: number;
 }
+
+export type Category = 'Personal' | 'Health' | 'Career' | 'Finance' | 'Learning' | 'Relationships' | 'Creative';
+export type EventType = 'focus' | 'meeting' | 'routine' | 'rest';
 
 export interface Habit {
   id: string;
@@ -39,6 +50,11 @@ export interface EventItem {
   color: string;
 }
 
+export interface Settings {
+  locale: Locale;
+  weekStartsOn: 0 | 1;
+}
+
 export interface AppState {
   version: number;
   goals: Goal[];
@@ -46,6 +62,7 @@ export interface AppState {
   events: EventItem[];
   focus: string;
   priorities: Priority[];
+  settings: Settings;
 }
 
 export type ModalType = 'goal' | 'habit' | 'event' | 'priority' | null;

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface Action {
@@ -13,16 +14,25 @@ interface ActionSheetProps {
 }
 
 export default function ActionSheet({ title, options, onClose }: ActionSheetProps) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col justify-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex flex-col justify-end" onClick={onClose} role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-black/60" />
       <div
-        className="relative z-10 mx-3 mb-6 rounded-[28px] bg-[#151515] p-4 shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
+        className="relative z-10 mx-3 mb-4 rounded-[28px] bg-[#151515] p-4 pb-[max(1rem,var(--tg-inset-bottom,0px))] shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#333]" />
         <div className="flex items-center justify-between mb-3">
           <p className="text-lg font-semibold">{title}</p>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-[#1c1c1c] flex items-center justify-center text-[#a6a6a6]">
+          <button onClick={onClose} aria-label={title} className="w-9 h-9 rounded-full bg-[#1c1c1c] flex items-center justify-center text-[#a6a6a6] transition-colors active:bg-[#2a2a2a]">
             <X size={18} />
           </button>
         </div>
@@ -31,7 +41,7 @@ export default function ActionSheet({ title, options, onClose }: ActionSheetProp
             <button
               key={i}
               onClick={opt.onClick}
-              className={`w-full rounded-[20px] px-4 py-3.5 text-left text-base font-medium transition-colors ${
+              className={`w-full rounded-[20px] px-4 py-3.5 text-left text-base font-medium transition-colors active:scale-[0.98] ${
                 opt.danger ? 'bg-[#2a1a1a] text-[#FF9F9F]' : 'bg-[#1c1c1c] text-white hover:bg-[#252525]'
               }`}
             >
