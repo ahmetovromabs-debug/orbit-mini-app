@@ -79,7 +79,7 @@ export default function FocusTimer({ taskTitle, onClose }: FocusTimerProps) {
       <button
         onClick={onClose}
         aria-label={t('common.close')}
-        className="absolute top-6 right-6 w-12 h-12 rounded-full bg-[#151515] flex items-center justify-center text-white active:scale-90 transition-transform"
+        className="absolute top-[max(1.5rem,var(--tg-inset-top,0px))] right-[max(1.5rem,var(--tg-inset-right,0px))] w-12 h-12 rounded-full bg-[#151515] flex items-center justify-center text-white active:scale-90 transition-transform"
       >
         <X size={22} />
       </button>

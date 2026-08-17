@@ -35,6 +35,10 @@
     overscroll-behavior-y: none;
   }
 
+  html {
+    min-height: var(--tg-viewport-stable-height, 100dvh);
+  }
+
   body {
     font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-base);
@@ -47,7 +51,8 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-height: 100dvh;
+    min-height: var(--tg-viewport-stable-height, 100dvh);
+    height: var(--tg-viewport-stable-height, 100dvh);
     position: relative;
     background: radial-gradient(ellipse at top, #15151f 0%, #0a0a0a 55%);
   }

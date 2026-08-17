@@ -137,7 +137,7 @@ export default function ItemForm({ type, id, defaults, onClose }: ItemFormProps)
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 flex max-h-[85vh] flex-col rounded-t-[32px] bg-[#0f0f0f] p-4 pb-[max(1rem,var(--tg-safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.5)]"
+        className="relative z-10 flex max-h-[min(85vh,var(--tg-viewport-stable-height,100vh))] flex-col rounded-t-[32px] bg-[#0f0f0f] p-4 pb-[max(1rem,var(--tg-inset-bottom,0px))] shadow-[0_-12px_40px_rgba(0,0,0,0.5)]"
       >
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#333]" />
         <h2 className="mb-4 text-2xl font-semibold">{formTitle()}</h2>

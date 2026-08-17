@@ -19,7 +19,7 @@ const tabs: { id: Tab; icon: React.ElementType; labelKey: 'tab.today' | 'tab.goa
 export default function BottomNav({ active, onChange }: BottomNavProps) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex items-end justify-center px-3 pb-[max(0.75rem,var(--tg-safe-area-inset-bottom))] pt-2 bg-transparent pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 z-50 flex items-end justify-center px-3 pb-[max(0.75rem,var(--tg-inset-bottom,0px))] pt-2 bg-transparent pointer-events-none"
       role="tablist"
       aria-label={t('app.title')}
     >

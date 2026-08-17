@@ -66,14 +66,38 @@ export default function App() {
 
     const applyInsets = () => {
       const root = document.documentElement;
-      const ins = tg.safeAreaInset || {};
-      root.style.setProperty('--tg-safe-area-inset-top', `${ins.top || 0}px`);
-      root.style.setProperty('--tg-safe-area-inset-right', `${ins.right || 0}px`);
-      root.style.setProperty('--tg-safe-area-inset-bottom', `${ins.bottom || 0}px`);
-      root.style.setProperty('--tg-safe-area-inset-left', `${ins.left || 0}px`);
+      const safe = tg.safeAreaInset || {};
+      const content = tg.contentSafeAreaInset || {};
+
+      const safeTop = safe.top || 0;
+      const safeRight = safe.right || 0;
+      const safeBottom = safe.bottom || 0;
+      const safeLeft = safe.left || 0;
+
+      const contentTop = content.top || 0;
+      const contentRight = content.right || 0;
+      const contentBottom = content.bottom || 0;
+      const contentLeft = content.left || 0;
+
+      const set = (name: string, value: number) => root.style.setProperty(name, `${value}px`);
+
+      set('--tg-safe-area-inset-top', safeTop);
+      set('--tg-safe-area-inset-right', safeRight);
+      set('--tg-safe-area-inset-bottom', safeBottom);
+      set('--tg-safe-area-inset-left', safeLeft);
+
+      set('--tg-inset-top', safeTop + contentTop);
+      set('--tg-inset-right', safeRight + contentRight);
+      set('--tg-inset-bottom', safeBottom + contentBottom);
+      set('--tg-inset-left', safeLeft + contentLeft);
+
+      root.style.setProperty('--tg-viewport-height', `${tg.viewportHeight || window.innerHeight}px`);
+      root.style.setProperty('--tg-viewport-stable-height', `${tg.viewportStableHeight || window.innerHeight}px`);
     };
     applyInsets();
     tg.onEvent?.('safeAreaChanged', applyInsets);
+    tg.onEvent?.('contentSafeAreaChanged', applyInsets);
+    tg.onEvent?.('viewportChanged', applyInsets);
 
     try {
       if (tg.requestFullscreen && !tg.isFullscreen) {
@@ -85,6 +109,8 @@ export default function App() {
 
     return () => {
       tg.offEvent?.('safeAreaChanged', applyInsets);
+      tg.offEvent?.('contentSafeAreaChanged', applyInsets);
+      tg.offEvent?.('viewportChanged', applyInsets);
     };
   }, []);
 
@@ -126,10 +152,9 @@ export default function App() {
   };
 
   return (
-    <div className="relative flex flex-col h-full overflow-hidden bg-[#0a0a0a]">
+    <div className="relative flex flex-col min-h-[var(--tg-viewport-stable-height,100dvh)] h-full overflow-hidden bg-[#0a0a0a]">
       <main
-        className="flex-1 overflow-y-auto px-3 pt-[max(1.25rem,var(--tg-safe-area-inset-top))] pb-32"
-        style={{ paddingBottom: 'calc(7.5rem + var(--tg-safe-area-inset-bottom, 0px))' }}
+        className="flex-1 overflow-y-auto px-3 pt-[max(1.5rem,var(--tg-inset-top,0px))] pb-[calc(7.5rem+var(--tg-inset-bottom,0px))]"
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
